@@ -14,12 +14,12 @@ const loader = new GLTFLoader();
 loader.load('model.glb', (gltf) => {
     gltf.scene.traverse((child) => {
         if (child.isMesh) {
-            // Eğer bu kutunun DIŞ yüzeyiyse
-            if (child.name === 'Kutu_Dis') {
+            // Dış çerçeve (Portal_Mat) görünmez olsun ama derinlik kalsın
+            if (child.material.name === 'Portal_Mat') { 
                 child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
             }
-            // Eğer bu kutunun İÇ yüzeyiyse (Portal)
-            if (child.name === 'Kutu_Ic') {
+            // İç kısım (Occluder_Mat) portal penceresi olsun
+            if (child.material.name === 'Occluder_Mat') {
                 child.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
             }
         }
