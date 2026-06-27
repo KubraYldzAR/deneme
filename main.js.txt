@@ -10,17 +10,25 @@ document.body.appendChild(renderer.domElement);
 document.body.appendChild(ARButton.createButton(renderer));
 
 const loader = new GLTFLoader();
-loader.load('model.glb', (gltf) => {
-    gltf.scene.traverse((child) => {
-        if (child.isMesh) {
-            if (child.name === 'Occluder_Mat') { // Blender'daki isim
-                child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
-            } else if (child.name === 'Portal_Mat') { // Blender'daki isim
-                child.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5 });
-            }
-        }
-    });
-    scene.add(gltf.scene);
-});
 
-renderer.setAnimationLoop(() => { renderer.render(scene, camera); });
+// Hata ayıklama ile model yükleme
+loader.load(
+    'model.glb', 
+    (gltf) => {
+        gltf.scene.traverse((child) => {
+            if (child.isMesh) {
+                // Blender'daki materyal isimlerinle tam eşleşmeli
+                if (child.material.name === 'Occluder_Mat') {
+                    child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
+                } else if (child.material.name === 'Portal_Mat') {
+                    child.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5 });
+                }
+            }
+        });
+        scene.add(gltf.scene);
+    },
+    (xhr) => { console.log((xhr.loaded / xhr.total * 100) + '% yüklendi'); },
+    (error) => { console.error('Model yüklenirken hata oluştu:', error); }
+);
+
+renderer.setAnimationLoop((time, frame) => { renderer.render(scene, camera); });
