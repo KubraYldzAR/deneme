@@ -11,24 +11,20 @@ document.body.appendChild(ARButton.createButton(renderer));
 
 const loader = new GLTFLoader();
 
-// Hata ayıklama ile model yükleme
-loader.load(
-    'model.glb', 
-    (gltf) => {
-        gltf.scene.traverse((child) => {
-            if (child.isMesh) {
-                // Blender'daki materyal isimlerinle tam eşleşmeli
-                if (child.material.name === 'Occluder_Mat') {
-                    child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
-                } else if (child.material.name === 'Portal_Mat') {
-                    child.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5 });
-                }
+loader.load('model.glb', (gltf) => {
+    gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+            // Eğer bu kutunun DIŞ yüzeyiyse
+            if (child.name === 'Kutu_Dis') {
+                child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
             }
-        });
-        scene.add(gltf.scene);
-    },
-    (xhr) => { console.log((xhr.loaded / xhr.total * 100) + '% yüklendi'); },
-    (error) => { console.error('Model yüklenirken hata oluştu:', error); }
-);
+            // Eğer bu kutunun İÇ yüzeyiyse (Portal)
+            if (child.name === 'Kutu_Ic') {
+                child.material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+            }
+        }
+    });
+    scene.add(gltf.scene);
+});
 
 renderer.setAnimationLoop((time, frame) => { renderer.render(scene, camera); });
